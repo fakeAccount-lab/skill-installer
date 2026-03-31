@@ -45,18 +45,41 @@ cd skill-installer
 # 安装依赖并构建
 npm install && npm run build
 
-# 创建全局命令
+# 方法 A：使用 npm link（推荐，最简单）
+npm link
+
+# 然后可以直接使用
+skill-installer --help
+
+# 方法 B：创建符号链接
 sudo ln -s $(pwd)/bin/skill-installer.js /usr/local/bin/skill-installer
+```
+
+#### Windows
+
+**方法 A：使用 npm link（推荐，最简单）**
+
+```powershell
+# 克隆仓库
+git clone https://github.com/fakeAccount-lab/skill-installer.git
+cd skill-installer
+
+# 安装依赖并构建
+npm install && npm run build
+
+# 创建全局链接
+npm link
 
 # 然后可以直接使用
 skill-installer --help
 ```
 
-#### Windows
+**卸载**：
+```powershell
+npm unlink -g skill-installer
+```
 
-**重要说明**：Windows 系统上，必须使用批处理文件或确保工作目录正确。直接将 `bin` 目录添加到 PATH 可能无法正常工作。
-
-##### 方法 A：使用批处理文件（推荐）
+**方法 B：使用批处理文件**
 
 ```powershell
 # 克隆仓库
@@ -85,11 +108,11 @@ skill-installer --help
 2. 点击"高级系统设置"
 3. 点击"环境变量"
 4. 在"用户变量"或"系统变量"中找到 `Path`，点击"编辑"
-5. 点击"新建"，添加 `C:\Users\YourName\skill-installer`（替换为你的实际项目路径）
+5. 点击"新建"，添加你的路径
 6. 点击"确定"保存
 7. **重启终端**或**重新登录**以使更改生效
 
-##### 方法 B：使用 PowerShell 别名
+**方法 C：使用 PowerShell 别名**
 
 在 PowerShell 配置文件中添加别名：
 
@@ -98,46 +121,12 @@ skill-installer --help
 notepad $PROFILE
 
 # 添加以下行（替换为你的实际路径）
-function skill-installer { 
-  Set-Location C:\Users\YourName\skill-installer
-  node dist\cli.js $args
-  Set-Location $OLDPWD
+function skill-installer {
+    node C:\Users\YourName\skill-installer\dist\cli.js $args
 }
 
 # 保存文件并重启 PowerShell
-
-# 然后可以使用
-skill-installer --help
 ```
-
-**更简洁的版本**（不改变当前目录）：
-
-```powershell
-function skill-installer { 
-  node C:\Users\YourName\skill-installer\dist\cli.js $args
-}
-```
-
-##### 方法 C：使用 Git Bash（如果已安装）
-
-如果你使用 Git Bash，可以创建一个 bash 脚本：
-
-```bash
-# 在 Git Bash 中运行
-cd skill-installer
-cat > /usr/local/bin/skill-installer << 'EOF'
-#!/bin/bash
-cd /c/Users/YourName/skill-installer
-node dist/cli.js "$@"
-EOF
-
-chmod +x /usr/local/bin/skill-installer
-
-# 然后可以直接使用
-skill-installer --help
-```
-
-**注意**：Git Bash 使用 `/c/Users/` 格式表示 Windows 路径。
 
 ## 使用方法
 
