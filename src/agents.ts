@@ -60,7 +60,17 @@ export const DEFAULT_AGENTS: Record<string, AgentConfig> = {
     skillsDir: '.agents/skills',
     globalSkillsDir: join(configHome, 'agents/skills'),
     detectInstalled: async () => false
-  }
+  },
+  // 在这里添加你的自定义 agent
+  // 'your-agent-id': {
+  //   name: 'your-agent-id',
+  //   displayName: 'Your Agent Display Name',
+  //   skillsDir: '.your-agent/skills',
+  //   globalSkillsDir: join(home, '.your-agent/skills'),
+  //   detectInstalled: async () => {
+  //     return existsSync(join(home, '.your-agent'));
+  //   }
+  // }
 };
 
 function getOpenClawGlobalSkillsDir(): string {
