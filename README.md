@@ -35,6 +35,8 @@ node dist/cli.js --help
 
 ### 方法二：创建全局命令（可选）
 
+#### Linux / macOS
+
 ```bash
 # 克隆仓库
 git clone https://github.com/fakeAccount-lab/skill-installer.git
@@ -48,6 +50,79 @@ sudo ln -s $(pwd)/bin/skill-installer.js /usr/local/bin/skill-installer
 
 # 然后可以直接使用
 skill-installer --help
+```
+
+#### Windows
+
+##### 方法 A：添加到 PATH（推荐）
+
+```powershell
+# 克隆仓库
+git clone https://github.com/fakeAccount-lab/skill-installer.git
+cd skill-installer
+
+# 安装依赖并构建
+npm install && npm run build
+
+# 查看当前目录的完整路径
+pwd
+
+# 将以下路径添加到系统 PATH 环境变量：
+# <当前目录>\bin
+# 例如：C:\Users\YourName\skill-installer\bin
+
+# 添加 PATH 后，重启终端，然后可以直接使用
+skill-installer --help
+```
+
+**添加 PATH 的步骤：**
+
+1. 右键点击"此电脑" → "属性"
+2. 点击"高级系统设置"
+3. 点击"环境变量"
+4. 在"系统变量"中找到 `Path`，点击"编辑"
+5. 点击"新建"，添加 `C:\Users\YourName\skill-installer\bin`（替换为你的实际路径）
+6. 点击"确定"保存
+7. **重启终端**或**重新登录**以使更改生效
+
+##### 方法 B：创建批处理文件（备用）
+
+```powershell
+# 克隆仓库
+git clone https://github.com/fakeAccount-lab/skill-installer.git
+cd skill-installer
+
+# 安装依赖并构建
+npm install && npm run build
+
+# 创建批处理文件
+@echo off
+node "%~dp0dist\cli.js" %*
+```
+
+将上述内容保存为 `skill-installer.bat`，放到 PATH 中的任意目录（如 `C:\Windows` 或其他已添加到 PATH 的目录）。
+
+**具体步骤：**
+
+1. 在项目根目录创建 `skill-installer.bat` 文件
+2. 将该文件复制到 `C:\Users\YourName\AppData\Local\Microsoft\WindowsApps`（或者其他 PATH 中的目录）
+3. 在新的终端窗口中测试：
+   ```powershell
+   skill-installer --help
+   ```
+
+##### 方法 C：使用 PowerShell 别名
+
+在 PowerShell 配置文件中添加别名：
+
+```powershell
+# 编辑 PowerShell 配置文件
+notepad $PROFILE
+
+# 添加以下行（替换为你的实际路径）
+function skill-installer { node C:\Users\YourName\skill-installer\dist\cli.js $args }
+
+# 保存文件并重启 PowerShell
 ```
 
 ## 使用方法
@@ -188,6 +263,205 @@ description: 这个技能的作用和使用场景
 
 可选字段：
 - `metadata.internal: true` - 标记为内部技能（默认隐藏）
+
+## Skill 发现机制
+
+工具会按以下顺序查找技能：
+
+### 1. 标准目录扫描
+
+首先会在以下标准目录中搜索（按优先级排序）：
+
+- 根目录 (`/`)
+- `skills/`
+- `skills/.curated/`
+- `skills/.experimental/`
+- `skills/.system/`
+- `.agents/skills/`
+- `.agent/skills/`
+- `.claude/skills/`
+- `.codex/skills/`
+- `.cursor/skills/`
+- `.cline/skills/`
+- `.codebuddy/skills/`
+- `.continue/skills/`
+- `.crush/skills/`
+- `.factory/skills/`
+- `.gemini/skills/`
+- `.github/skills/`
+- `.goose/skills/`
+- `.kilocode/skills/`
+- `.kiro/skills/`
+- `.mcpjam/skills/`
+- `.mux/skills/`
+- `.openhands/skills/`
+- `.opencode/skills/`
+- `.pi/skills/`
+- `.qoder/skills/`
+- `.qwen/skills/`
+- `.roo/skills/`
+- `.trae/skills/`
+- `.windsurf/skills/`
+- `.zencoder/skills/`
+
+### 2. 递归搜索（兜底方案）
+
+**如果标准目录中没有找到任何技能，工具会进行递归搜索**：
+
+- 从仓库根目录开始
+- 递归遍历所有子目录（最多 5 层深度）
+- 在每个目录中查找 `SKILL.md` 文件
+- 跳过以下目录：`.git`、`__pycache__`、`__pypackages__`、`node_modules`、`dist`
+- 跳过以 `.` 开头的文件和目录
+
+### 3. 去重
+
+如果找到多个同名技能，只保留第一个发现的。
+
+---
+
+## 技能存放结构建议
+
+### ✅ 推荐结构（标准目录）
+
+**方案 A：集中式管理（推荐）**
+
+```
+my-skills-repo/
+├── skills/                    # 技能集中目录
+│   ├── weather/              # 天气技能
+│   │   └── SKILL.md
+│   ├── git-helper/           # Git 帮助技能
+│   │   └── SKILL.md
+│   └── code-review/          # 代码审查技能
+│       └── SKILL.md
+├── README.md
+└── package.json
+```
+
+**优点**：
+- 结构清晰，易于管理
+- 查找速度快（直接在标准目录中找到）
+- 符合大多数项目的惯例
+
+---
+
+**方案 B：分类管理（适合大量技能）**
+
+```
+my-skills-repo/
+├── skills/
+│   ├── .curated/             # 精选技能
+│   │   ├── weather/
+│   │   └── git-helper/
+│   ├── .experimental/        # 实验性技能
+│   │   └── new-feature/
+│   └── .system/              # 系统技能
+│       └── internal-tool/
+├── README.md
+└── package.json
+```
+
+**优点**：
+- 可以按状态分类管理
+- 支持版本控制（experimental vs stable）
+- 便于团队协作
+
+---
+
+**方案 C：混合式管理（推荐）**
+
+```
+my-skills-repo/
+├── skills/                   # 主要技能目录
+│   ├── weather/
+│   │   └── SKILL.md
+│   └── git-helper/
+│       └── SKILL.md
+├── .github/skills/           # GitHub Actions 相关技能
+│   └── pr-checker/
+│       └── SKILL.md
+├── docs/skills/              # 文档生成相关技能
+│   └── markdown-helper/
+│       └── SKILL.md
+├── README.md
+└── package.json
+```
+
+**优点**：
+- 灵活性高
+- 可以按功能分组
+- 仍能在标准目录中快速找到
+
+---
+
+### ⚠️ 不推荐结构
+
+**散布式管理（虽然支持，但不推荐）**
+
+```
+my-skills-repo/
+├── src/                      # 源代码
+├── utils/                    # 工具函数
+├── weather/                  # ❌ 技能散布在各处
+│   └── SKILL.md
+├── git-helper/               # ❌ 难以维护
+│   └── SKILL.md
+├── tests/                    # 测试
+└── code-review/              # ❌ 混杂在项目中
+    └── SKILL.md
+```
+
+**缺点**：
+- 技能散布在各处，难以管理
+- 需要递归搜索（性能较低）
+- 容易与项目其他文件混淆
+- 维护成本高
+
+---
+
+### 🎯 最佳实践建议
+
+1. **使用 `skills/` 作为主目录**
+   - 这是最常见的标准目录
+   - 会被优先扫描
+
+2. **按功能或状态分类**
+   - 使用 `.curated`、`.experimental`、`.system` 子目录
+   - 便于管理和版本控制
+
+3. **避免在根目录散布技能**
+   - 虽然工具支持递归搜索，但会影响性能
+   - 不利于项目维护
+
+4. **使用有意义的技能名称**
+   - 目录名应该反映技能的功能
+   - 例如：`weather/`、`git-helper/`、`code-review/`
+
+5. **保持技能独立性**
+   - 每个技能应该是一个独立的目录
+   - 包含自己的 `SKILL.md` 和相关文件
+   - 避免技能之间共享依赖
+
+---
+
+## 常见问题
+
+### Q: 我的技能散布在代码仓各处，工具能检测到吗？
+
+A: **能！** 工具会进行递归搜索（最多 5 层深度），能够找到散布在各处的技能。但为了更好的性能和可维护性，建议使用标准目录结构。
+
+### Q: 递归搜索会影响性能吗？
+
+A: 会。递归搜索需要遍历整个目录树，而标准目录扫描是直接查找。对于大型仓库，建议使用标准目录结构。
+
+### Q: 递归搜索的深度限制可以调整吗？
+
+A: 目前硬编码为 5 层深度。如果需要调整，可以修改 `src/skills.ts` 中的 `maxDepth` 参数。
+
+### Q: 工具会检测到隐藏目录中的技能吗？
+
+A: 不会。默认跳过以 `.` 开头的目录（除了标准目录列表中的那些）。如果需要在隐藏目录中存放技能，请使用标准目录（如 `.agents/skills/`）。
 
 ## 冲突解决
 
