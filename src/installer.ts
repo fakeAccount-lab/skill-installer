@@ -16,6 +16,27 @@ function isExcluded(name: string, isDirectory: boolean = false): boolean {
 }
 
 /**
+ * Expand tilde (~) to home directory
+ */
+function expandTilde(path: string): string {
+  const home = homedir();
+  if (!path.startsWith('~')) {
+    return path;
+  }
+  // Replace ~ with home directory
+  if (path === '~') {
+    return home;
+  }
+  // Replace ~/path with home/path
+  if (path.startsWith('~/')) {
+    return join(home, path.substring(2));
+  }
+  // For ~user/path syntax, we would need to resolve to that user's home directory
+  // For now, just return the path as-is (it will be handled by resolve() later)
+  return path;
+}
+
+/**
  * Sanitize a filename to prevent path traversal attacks
  */
 export function sanitizeName(name: string): string {
@@ -50,7 +71,8 @@ function getAgentSkillsDir(agent: AgentConfig, global: boolean, cwd?: string): s
   const baseDir = global ? homedir() : cwd || process.cwd();
   
   if (global && agent.globalSkillsDir) {
-    return agent.globalSkillsDir;
+    // Expand tilde to home directory if present
+    return expandTilde(agent.globalSkillsDir);
   }
   
   return join(baseDir, agent.skillsDir);
@@ -301,7 +323,7 @@ export async function isSkillInstalled(
   }
 
   const targetBase = options.global
-    ? agent.globalSkillsDir!
+    ? expandTilde(agent.globalSkillsDir!)
     : join(options.cwd || process.cwd(), agent.skillsDir);
   const skillDir = join(targetBase, sanitized);
 

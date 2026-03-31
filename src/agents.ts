@@ -61,6 +61,16 @@ export const DEFAULT_AGENTS: Record<string, AgentConfig> = {
     globalSkillsDir: join(configHome, 'agents/skills'),
     detectInstalled: async () => false
   },
+  // Test agent with tilde in globalSkillsDir (for testing tilde expansion)
+  'test-agent': {
+    name: 'test-agent',
+    displayName: 'Test Agent',
+    skillsDir: '.test-agent/skills',
+    globalSkillsDir: '~/.test-agent/skills',
+    detectInstalled: async () => {
+      return existsSync(join(home, '.test-agent'));
+    }
+  },
   // 在这里添加你的自定义 agent
   // 'your-agent-id': {
   //   name: 'your-agent-id',

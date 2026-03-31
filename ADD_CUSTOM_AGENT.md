@@ -34,13 +34,15 @@ export const DEFAULT_AGENTS: Record<string, AgentConfig> = {
     name: 'my-agent',
     displayName: 'My Agent',
     skillsDir: '.my-agent/skills',
-    globalSkillsDir: join(home, '.my-agent/skills'),
+    globalSkillsDir: '~/.my-agent/skills',  // ✅ 支持 ~ 符号，会自动展开
     detectInstalled: async () => {
       return existsSync(join(home, '.my-agent'));
     }
   }
 };
 ```
+
+**注意**：`~` 符号会被自动展开为用户主目录。你也可以使用 `join(home, '.my-agent/skills')` 的形式。
 
 ### 示例 2：支持环境变量的 Agent
 
